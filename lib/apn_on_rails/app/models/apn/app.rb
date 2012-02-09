@@ -8,9 +8,9 @@ class APN::App < APN::Base
   has_many :unsent_group_notifications, :through => :groups
     
   def cert
-    (RAILS_ENV == 'production' ? apn_prod_cert : apn_dev_cert)
+    (Rails.env.production? ? (apn_prod_cert || apn_dev_cert) : (apn_dev_cert || apn_prod_cert))
   end
-  
+
   # Opens a connection to the Apple APN server and attempts to batch deliver
   # an Array of group notifications.
   # 
@@ -32,7 +32,7 @@ class APN::App < APN::Base
       app.send_notifications
     end
     if !configatron.apn.cert.blank?
-      global_cert = File.read(configatron.apn.cert)
+      global_cert = File.read(configatron.apn.cert[Rails.env.production? ? :prod : :dev])
       send_notifications_for_cert(global_cert, nil)
     end
   end
@@ -125,7 +125,7 @@ class APN::App < APN::Base
       app.process_devices
     end
     if !configatron.apn.cert.blank?
-      global_cert = File.read(configatron.apn.cert)
+      global_cert = File.read(configatron.apn.cert[Rails.env.production? ? :prod : :dev])
       APN::App.process_devices_for_cert(global_cert)
     end
   end

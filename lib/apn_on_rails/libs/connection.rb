@@ -27,25 +27,30 @@ module APN
       # The connections are close automatically.
       # Configuration parameters are:
       # 
-      #   configatron.apn.feedback.passphrase = ''
       #   configatron.apn.feedback.port = 2196
       #   configatron.apn.feedback.host = 'feedback.sandbox.push.apple.com' # Development
       #   configatron.apn.feedback.host = 'feedback.push.apple.com' # Production
-      #   configatron.apn.feedback.cert = File.join(rails_root, 'config', 'apple_push_notification_development.pem')) # Development
-      #   configatron.apn.feedback.cert = File.join(rails_root, 'config', 'apple_push_notification_production.pem')) # Production
       def open_for_feedback(options = {}, &block)
-        options = {:cert => configatron.apn.feedback.cert,
-                   :passphrase => configatron.apn.feedback.passphrase,
-                   :host => configatron.apn.feedback.host,
+        env = if options[:production]
+          options[:production].to_i == 1 ? :prod : :dev
+        else
+          Rails.env.production? ? :prod : :dev
+        end
+        options = {:host => configatron.apn.feedback.host[env],
                    :port => configatron.apn.feedback.port}.merge(options)
         open(options, &block)
       end
       
       private
       def open(options = {}, &block) # :nodoc:
-        options = {:cert => configatron.apn.cert,
+        env = if options[:production]
+          options[:production].to_i == 1 ? :prod : :dev
+        else
+          Rails.env.production? ? :prod : :dev
+        end
+        options = {:cert => configatron.apn.cert[env],
                    :passphrase => configatron.apn.passphrase,
-                   :host => configatron.apn.host,
+                   :host => configatron.apn.host[env],
                    :port => configatron.apn.port}.merge(options)
         #cert = File.read(options[:cert])
         cert = options[:cert]
