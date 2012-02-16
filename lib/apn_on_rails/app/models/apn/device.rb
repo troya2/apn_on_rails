@@ -37,7 +37,7 @@ class APN::Device < APN::Base
   
   # Returns the hexadecimal representation of the device's token.
   def to_hexa
-    [self.token.delete(' ')].pack('H*').force_encoding("UTF-8")
+    [self.token.delete(' ')].pack('H*')
   end
   
   def set_last_registered_at
