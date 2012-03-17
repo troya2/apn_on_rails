@@ -7,15 +7,15 @@ class AlterApnNotifications < ActiveRecord::Migration # :nodoc:
   end
   
   def self.up
-    unless APN::Notification.column_names.include?("custom_properties")
-      add_column :apn_notifications, :custom_properties, :text
-    end
+    # unless APN::Notification.column_names.include?("custom_properties")
+      add_column(:apn_notifications, :custom_properties, :text) rescue nil
+    # end
   end
 
   def self.down
-    if APN::Notification.column_names.include?("custom_properties")
-      remove_column :apn_notifications, :custom_properties
-    end
+    # if APN::Notification.column_names.include?("custom_properties")
+      remove_column(:apn_notifications, :custom_properties) rescue nil
+    # end
   end
   
 end
