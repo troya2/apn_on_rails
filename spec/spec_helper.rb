@@ -1,3 +1,4 @@
+require 'rubygems'
 require 'rspec'
 require 'action_view'
 
@@ -9,9 +10,17 @@ require File.join(File.dirname(__FILE__), 'active_record', 'setup_ar.rb')
 
 require File.join(File.dirname(__FILE__), '..', 'lib', 'apn_on_rails')
 
-Dir.glob(File.join(File.dirname(__FILE__), 'factories', '*.rb')).sort.each do |f|
-  require f
-end
+# Dir.glob(File.join(File.dirname(__FILE__), 'factories', '*.rb')).sort.each do |f|
+#   require f
+# end
+
+require File.join(File.dirname(__FILE__), 'factories', 'app_factory.rb')
+require File.join(File.dirname(__FILE__), 'factories', 'device_factory.rb')
+require File.join(File.dirname(__FILE__), 'factories', 'group_factory.rb')
+require File.join(File.dirname(__FILE__), 'factories', 'device_grouping_factory.rb')
+require File.join(File.dirname(__FILE__), 'factories', 'group_notification_factory.rb')
+require File.join(File.dirname(__FILE__), 'factories', 'notification_factory.rb')
+require File.join(File.dirname(__FILE__), 'factories', 'pull_notification_factory.rb')
 
 configatron.apn.cert = File.expand_path(File.join(File.dirname(__FILE__), 'rails_root', 'config', 'apple_push_notification_development.pem'))
 
