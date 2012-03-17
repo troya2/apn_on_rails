@@ -14,11 +14,8 @@ end
 
 configatron.apn.set_default(:passphrase, '')
 configatron.apn.set_default(:port, 2195)
-configatron.apn.set_default(:host, {prod: 'gateway.push.apple.com', dev: 'gateway.sandbox.push.apple.com'})
-configatron.apn.set_default(:cert, {prod: File.join(rails_root, 'config', 'apple_push_notification_production.pem'), dev: File.join(rails_root, 'config', 'apple_push_notification_development.pem')})
 
 configatron.apn.feedback.set_default(:port, 2196)
-configatron.apn.feedback.set_default(:host, {prod: 'feedback.push.apple.com', dev: 'feedback.sandbox.push.apple.com'})
 
 if rails_env == 'production'
   configatron.apn.set_default(:host, 'gateway.push.apple.com')
