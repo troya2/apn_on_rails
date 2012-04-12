@@ -8,8 +8,8 @@ if defined?(Rails.root)
 end
 
 rails_env = 'development'
-if defined?(Rails.env)
-  rails_env = Rails.env
+if defined?(::Rails.env)
+  rails_env = ::Rails.env
 end
 
 configatron.apn.set_default(:passphrase, '')

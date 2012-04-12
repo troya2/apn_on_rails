@@ -34,7 +34,7 @@ module APN
         env = if options[:production]
           options[:production].to_i == 1 ? :prod : :dev
         else
-          Rails.env.production? ? :prod : :dev
+          ::Rails.env.production? ? :prod : :dev
         end
         options = {:host => configatron.apn.feedback.host[env],
                    :port => configatron.apn.feedback.port}.merge(options)
@@ -46,7 +46,7 @@ module APN
         env = if options[:production]
           options[:production].to_i == 1 ? :prod : :dev
         else
-          Rails.env.production? ? :prod : :dev
+          ::Rails.env.production? ? :prod : :dev
         end
         options = {:passphrase => configatron.apn.passphrase,
                    :host => configatron.apn.host[env],
