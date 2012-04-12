@@ -17,8 +17,8 @@ module APN
       #   configatron.apn.port = 2195
       #   configatron.apn.host = 'gateway.sandbox.push.apple.com' # Development
       #   configatron.apn.host = 'gateway.push.apple.com' # Production
-      #   configatron.apn.cert = File.join(rails_root, 'config', 'apple_push_notification_development.pem')) # Development
-      #   configatron.apn.cert = File.join(rails_root, 'config', 'apple_push_notification_production.pem')) # Production
+      #   configatron.apn.cert[:dev] = File.join(rails_root, 'config', 'apple_push_notification_development.pem')) # Development
+      #   configatron.apn.cert[:prod] = File.join(rails_root, 'config', 'apple_push_notification_production.pem')) # Production
       def open_for_delivery(options = {}, &block)
         open(options, &block)
       end
@@ -48,12 +48,11 @@ module APN
         else
           Rails.env.production? ? :prod : :dev
         end
-        options = {:cert => configatron.apn.cert[env],
-                   :passphrase => configatron.apn.passphrase,
+        options = {:passphrase => configatron.apn.passphrase,
                    :host => configatron.apn.host[env],
                    :port => configatron.apn.port}.merge(options)
-        #cert = File.read(options[:cert])
-        cert = options[:cert]
+
+        cert = options[:cert] || configatron.apn.cert[env]
         ctx = OpenSSL::SSL::SSLContext.new
         ctx.key = OpenSSL::PKey::RSA.new(cert, options[:passphrase])
         ctx.cert = OpenSSL::X509::Certificate.new(cert)

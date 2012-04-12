@@ -10,10 +10,10 @@ module APN
       # has received feedback from Apple. Each APN::Device will
       # have it's <tt>feedback_at</tt> accessor marked with the time
       # that Apple believes the device de-registered itself.
-      def devices(cert, &block)
+      def devices(cert, production_option = nil, &block)
         devices = []
         return if cert.nil? 
-        APN::Connection.open_for_feedback({:cert => cert}) do |conn, sock|          
+        APN::Connection.open_for_feedback({:cert => cert, :production => production_option}) do |conn, sock|          
           while line = conn.read(38)   # Read 38 bytes from the SSL socket
             feedback = line.unpack('N1n1H140')            
             token = feedback[2].scan(/.{0,8}/).join(' ').strip

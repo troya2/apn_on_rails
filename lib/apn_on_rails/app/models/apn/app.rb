@@ -23,7 +23,7 @@ class APN::App < APN::Base
       raise APN::Errors::MissingCertificateError.new
       return
     end
-    APN::App.send_notifications_for_cert(self.cert, self.id)
+    APN::App.send_notifications_for_cert(self.cert, self.id, production_option)
   end
 
   def self.send_notifications
@@ -37,7 +37,7 @@ class APN::App < APN::Base
     end
   end
 
-  def self.send_notifications_for_cert(the_cert, app_id)
+  def self.send_notifications_for_cert(the_cert, app_id, production_option = nil)
     # unless self.unsent_notifications.nil? || self.unsent_notifications.empty?
       if (app_id == nil)
         conditions = "app_id is null"
@@ -45,7 +45,7 @@ class APN::App < APN::Base
         conditions = ["app_id = ?", app_id]
       end
       begin
-        APN::Connection.open_for_delivery({:cert => the_cert}) do |conn, sock|
+        APN::Connection.open_for_delivery({:cert => the_cert, :production => production_option}) do |conn, sock|
           APN::Device.find_each(:conditions => conditions) do |dev|
             dev.unsent_notifications.each do |noty|
               conn.write(noty.message_for_sending)
@@ -66,7 +66,7 @@ class APN::App < APN::Base
       return
     end
     unless self.unsent_group_notifications.nil? || self.unsent_group_notifications.empty?
-      APN::Connection.open_for_delivery({:cert => self.cert}) do |conn, sock|
+      APN::Connection.open_for_delivery({:cert => self.cert, :production => production_option}) do |conn, sock|
         unsent_group_notifications.each do |gnoty|
           gnoty.devices.find_each do |device|
             conn.write(gnoty.message_for_sending(device))
@@ -84,7 +84,7 @@ class APN::App < APN::Base
       return
     end
     unless gnoty.nil?
-      APN::Connection.open_for_delivery({:cert => self.cert}) do |conn, sock|
+      APN::Connection.open_for_delivery({:cert => self.cert, :production => production_option}) do |conn, sock|
         gnoty.devices.find_each do |device|
           conn.write(gnoty.message_for_sending(device))
         end
@@ -116,7 +116,7 @@ class APN::App < APN::Base
       raise APN::Errors::MissingCertificateError.new
       return
     end
-    APN::App.process_devices_for_cert(self.cert)
+    APN::App.process_devices_for_cert(self.cert, production_option)
   end # process_devices
 
   def self.process_devices
@@ -130,9 +130,9 @@ class APN::App < APN::Base
     end
   end
 
-  def self.process_devices_for_cert(the_cert)
+  def self.process_devices_for_cert(the_cert, production_option = nil)
     puts "in APN::App.process_devices_for_cert"
-    APN::Feedback.devices(the_cert).each do |device|
+    APN::Feedback.devices(the_cert, production_option).each do |device|
       if device.last_registered_at < device.feedback_at
         puts "device #{device.id} -> #{device.last_registered_at} < #{device.feedback_at}"
         device.destroy
@@ -147,6 +147,18 @@ class APN::App < APN::Base
   def self.log_connection_exception(ex)
     STDERR.puts ex.message
     raise ex
+  end
+
+  private
+
+  def production_option
+    if attributes.include? "host_environment"
+      if host_environment == 'production'
+        1
+      elsif host_environment == 'sandbox'
+        0
+      end
+    end
   end
 
 end
