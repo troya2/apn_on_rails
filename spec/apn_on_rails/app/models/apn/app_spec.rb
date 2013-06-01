@@ -22,7 +22,7 @@ describe APN::App do
       
       APN::Device.should_receive(:find_each).twice.and_yield(device)
       
-      device.should_receive(:unsent_notifications).and_return(notifications,[])
+      APN::Notification.should_receive(:unsent_for_app).and_return(notifications,[])
       
       
       ssl_mock = mock('ssl_mock')

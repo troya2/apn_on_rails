@@ -21,6 +21,13 @@ class APN::Notification < APN::Base
   
   belongs_to :device, :class_name => 'APN::Device'
   has_one    :app,    :class_name => 'APN::App', :through => :device
+
+  scope :unsent, where(sent_at:nil)
+
+  # app can be nil (which would return unsent notifications that aren't assigned to an app)
+  def self.unsent_for_app app = nil
+    APN::Notification.unsent.joins(:device).where(apn_devices:{app_id:app && app.id}).readonly(false)
+  end
   
   # Stores the text alert message you want to send to the device.
   # 

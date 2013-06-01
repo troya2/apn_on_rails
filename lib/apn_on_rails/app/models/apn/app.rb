@@ -23,7 +23,7 @@ class APN::App < APN::Base
       raise APN::Errors::MissingCertificateError.new
       return
     end
-    APN::App.send_notifications_for_cert(self.cert, self.id, production_option)
+    APN::App.send_notifications_for_cert(self.cert, self, production_option)
   end
 
   def self.send_notifications
@@ -33,31 +33,24 @@ class APN::App < APN::Base
     end
     if !configatron.apn.cert.blank?
       global_cert = File.read(configatron.apn.cert[::Rails.env.production? ? :prod : :dev])
-      send_notifications_for_cert(global_cert, nil)
+      send_notifications_for_cert(global_cert)
     end
   end
 
-  def self.send_notifications_for_cert(the_cert, app_id, production_option = nil)
-    # unless self.unsent_notifications.nil? || self.unsent_notifications.empty?
-      if (app_id == nil)
-        conditions = "app_id is null"
-      else
-        conditions = ["app_id = ?", app_id]
-      end
+  def self.send_notifications_for_cert(the_cert, app = nil, production_option = nil)
+    notifications = APN::Notification.unsent_for_app app
+    unless notifications.empty?
       begin
         APN::Connection.open_for_delivery({:cert => the_cert, :production => production_option}) do |conn, sock|
-          APN::Device.find_each(:conditions => conditions) do |dev|
-            dev.unsent_notifications.each do |noty|
-              conn.write(noty.message_for_sending)
-              noty.sent_at = Time.now
-              noty.save
-            end
+          notifications.each do |noty|
+            conn.write(noty.message_for_sending)
+            noty.update_attributes! sent_at:Time.now
           end
         end
       rescue Exception => e
         log_connection_exception(e)
       end
-    # end
+    end
   end
 
   def send_group_notifications
